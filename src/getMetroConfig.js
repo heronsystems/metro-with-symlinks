@@ -15,9 +15,9 @@ const mapModule = name =>
 
 const mapPath = path =>
     `/${path.replace(
-        /\//g,
-        '[/\\\\]',
-    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
+      /\//g,
+      "[/\\\\]"
+    )}[/\\\\]node_modules[/\\\\]]react-native/`;
 
 module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
