@@ -10,6 +10,10 @@ const exec = require('child_process').execSync
 const dedent = require('dedent-js')
 const getDependencyPath = require('./getDependencyPath')
 
+const replaceAll = (str, find, replace) => {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
@@ -20,7 +24,8 @@ const mapPath = path =>
     )}[/\\\\]node_modules[/\\\\]]react-native/`;
 
 module.exports = symlinkedDependencies => {
-    const symlinkedDependenciesPaths = symlinkedDependencies.map(
+    const escaped = symlinkedDependencies.map(d => replaceAll(getDependencyPath(d), "\\", "\/"))
+    const symlinkedDependenciesPaths = escaped.map(
         getDependencyPath,
     )
 
