@@ -21,11 +21,10 @@ const mapPath = path =>
     `/${path.replace(
       /\//g,
       "[/\\\\]"
-    )}[/\\\\]node_modules[/\\\\]]react-native/`;
+    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`;
 
 module.exports = symlinkedDependencies => {
-    const escaped = symlinkedDependencies.map(d => replaceAll(getDependencyPath(d), "\\", "\/"))
-    const symlinkedDependenciesPaths = escaped.map(
+    const symlinkedDependenciesPaths = symlinkedDependencies.map(
         getDependencyPath,
     )
 
@@ -53,7 +52,7 @@ module.exports = symlinkedDependencies => {
         .map(mapModule)
         .join(',\n  ')
 
-    const getBlacklistRE = symlinkedDependenciesPaths
+    const getBlacklistRE = symlinkedDependenciesPaths.map(d => replaceAll(d, /\\/, "\/"))
         .map(mapPath)
         .join(',\n  ')
 
