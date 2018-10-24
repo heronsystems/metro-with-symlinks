@@ -73,6 +73,12 @@ module.exports = symlinkedDependencies => {
       const metroVersionComponents = metroVersion.match(/^(\\d+)\\.(\\d+)\\.(\\d+)/);
       if (metroVersionComponents[1] === '0' && parseInt(metroVersionComponents[2], 10) >= 43) {
           module.exports = {
+            getTransformModulePath() {
+                return require.resolve("react-native-typescript-transformer")
+            },
+            getSourceExts() {
+                return ["ts", "tsx"]
+            },
             resolver: {
               extraNodeModules,
               blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
@@ -81,6 +87,12 @@ module.exports = symlinkedDependencies => {
           };
       } else {
           module.exports = {
+            getTransformModulePath() {
+                return require.resolve("react-native-typescript-transformer")
+            },
+            getSourceExts() {
+                return ["ts", "tsx"]
+            },
             extraNodeModules,
             getBlacklistRE: () => require('metro/src/blacklist')(blacklistRegexes),
             getProjectRoots: () => [path.resolve(__dirname)].concat(watchFolders)
