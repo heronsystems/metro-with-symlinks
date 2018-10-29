@@ -1,5 +1,5 @@
 {
-    "name": "metro-with-symlinks",
+    "name": "@heronsystems/metro-with-symlinks",
     "version": "1.3.0",
     "description": "Extension to metro packager enabling the use of symlinks.",
     "license": "MIT",
@@ -11,7 +11,7 @@
     "bin": {
         "metro-with-symlinks": "./bin/index.js"
     },
-    "repository": "https://github.com/MrLoh/metro-with-symlinks",
+    "repository": "https://github.com/heronsystems/metro-with-symlinks",
     "scripts": {
         "format": "prettier --write --list-different '**/*.js'",
         "test": "format"
