@@ -17,11 +17,12 @@ const replaceAll = (str, find, replace) => {
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
-const mapPath = path =>
-    `/${path.replace(
-      /\//g,
-      "[/\\\\]"
-    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`;
+const mapPath = path => {
+    const basePath = `/${path.replace(/\//g, "[/\\\\]")}`
+    return (
+        `${basePath}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/,\n\t${basePath}[/\\\\]node_modules[/\\\\]@heronsystems[/\\\\]lassie-data[/\\\\].*/`
+    )
+}
 
 module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
@@ -48,13 +49,40 @@ module.exports = symlinkedDependencies => {
                 dependencies.indexOf(dependency) === i,
         )
 
+    const devDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
+        .map(path => require(`${path}/package.json`).devDependencies)
+        .map(
+            (devDependencies, i) => {
+                const path = symlinkedDependenciesPaths[i]
+                return devDependencies ? Object.keys(devDependencies).map(k => `${path}/node_modules/${k}`) : []
+            }
+        )
+        // flatten the array of arrays
+        .reduce(
+            (flatDependencies, dependencies) => [
+                ...flatDependencies,
+                ...dependencies,
+            ],
+            [],
+        )
+        // filter to make array elements unique
+        .filter(
+            (dependency, i, dependencies) =>
+                dependencies.indexOf(dependency) === i,
+        )
     const extraNodeModules = peerDependenciesOfSymlinkedDependencies
         .map(mapModule)
         .join(',\n  ')
 
-    const getBlacklistRE = symlinkedDependenciesPaths.map(d => replaceAll(d, /\\/, "\/"))
+    const blackListDeps = symlinkedDependenciesPaths.concat(devDependenciesOfSymlinkedDependencies)
+
+    const getBlacklistRE = blackListDeps.map(d => replaceAll(d, /\\/, "\/"))
         .map(mapPath)
         .join(',\n  ')
+
+    // const getBlacklistRE = symlinkedDependenciesPaths.map(d => replaceAll(d, /\\/, "\/"))
+    //     .map(mapPath)
+    //     .join(',\n  ')
 
     const getProjectRoots = symlinkedDependenciesPaths
         .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
