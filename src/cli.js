@@ -12,7 +12,7 @@ const getSymlinkedDependencies = require('./getSymlinkedDependencies')
 const getMetroConfig = require('./getMetroConfig')
 const getDependencyPath = require('./getDependencyPath')
 
-const CONFIG_FILENAME = 'rn-cli.config.js'
+const CONFIG_FILENAME = 'metro.config.js'
 
 const mapDep = dep => `    - ${dep} -> ${getDependencyPath(dep)}`
 
