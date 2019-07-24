@@ -76,6 +76,10 @@ module.exports = symlinkedDependencies => {
             (dependency, i, dependencies) =>
                 dependencies.indexOf(dependency) === i,
         )
+        // .filter(d => {
+        //     const regex = new RegExp(/@babel\/runtime/);
+        //     return !regex.test(d)
+        // })
     const extraNodeModules = peerDependenciesOfSymlinkedDependencies
         .map(mapModule)
         .join(',\n  ')
