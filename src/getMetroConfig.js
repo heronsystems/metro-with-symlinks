@@ -76,10 +76,11 @@ module.exports = symlinkedDependencies => {
             (dependency, i, dependencies) =>
                 dependencies.indexOf(dependency) === i,
         )
-        // .filter(d => {
-        //     const regex = new RegExp(/@babel\/runtime/);
-        //     return !regex.test(d)
-        // })
+        // BH (7/26/2019): This is odd but it seems like anything that uses RN components needs @babel/runtime.
+        .filter(d => {
+            const regex = new RegExp(/@babel\/runtime/);
+            return !regex.test(d)
+        })
     const extraNodeModules = peerDependenciesOfSymlinkedDependencies
         .map(mapModule)
         .join(',\n  ')
