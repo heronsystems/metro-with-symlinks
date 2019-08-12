@@ -17,12 +17,18 @@ const replaceAll = (str, find, replace) => {
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
-const mapPath = path => {
+const mapBL = path => {
     const basePath = `/${path.replace(/\//g, "[/\\\\]")}`
     return (
-        `${basePath}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/,\n\t${basePath}[/\\\\]node_modules[/\\\\]@heronsystems[/\\\\]lassie-data[/\\\\].*/`
+        `${basePath}[/\\\\].*/`
     )
 }
+
+const mapPath = path =>
+    `/${path.replace(
+      /\//g,
+      "[/\\\\]"
+    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`;
 
 module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
@@ -70,19 +76,23 @@ module.exports = symlinkedDependencies => {
             (dependency, i, dependencies) =>
                 dependencies.indexOf(dependency) === i,
         )
+        // BH (7/26/2019): This is odd but it seems like anything that uses RN components needs @babel/runtime.
+        .filter(d => {
+            const regex = new RegExp(/@babel\/runtime/);
+            return !regex.test(d)
+        })
     const extraNodeModules = peerDependenciesOfSymlinkedDependencies
         .map(mapModule)
         .join(',\n  ')
 
-    const blackListDeps = symlinkedDependenciesPaths.concat(devDependenciesOfSymlinkedDependencies)
-
-    const getBlacklistRE = blackListDeps.map(d => replaceAll(d, /\\/, "\/"))
+    const getBlacklistForSymlink = symlinkedDependenciesPaths.map(d => replaceAll(d, /\\/, "\/"))
         .map(mapPath)
         .join(',\n  ')
 
-    // const getBlacklistRE = symlinkedDependenciesPaths.map(d => replaceAll(d, /\\/, "\/"))
-    //     .map(mapPath)
-    //     .join(',\n  ')
+    const getBlacklistRE = devDependenciesOfSymlinkedDependencies.map(d => replaceAll(d, /\\/, "\/"))
+        .map(mapBL)
+        .concat(getBlacklistForSymlink)
+        .join(',\n  ')
 
     const getProjectRoots = symlinkedDependenciesPaths
         .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
@@ -105,11 +115,13 @@ module.exports = symlinkedDependencies => {
       const metroVersionComponents = metroVersion.match(/^(\\d+)\\.(\\d+)\\.(\\d+)/);
       if (metroVersionComponents[1] === '0' && parseInt(metroVersionComponents[2], 10) >= 43) {
           module.exports = {
-            getTransformModulePath() {
-                return require.resolve("react-native-typescript-transformer")
-            },
-            getSourceExts() {
-                return ["ts", "tsx"]
+            transformer: {
+                getTransformOptions: async () => ({
+                    transform: {
+                        experimentalImportSupport: false,
+                        inlineRequires: false
+                    }
+                })
             },
             resolver: {
               extraNodeModules,
@@ -119,15 +131,17 @@ module.exports = symlinkedDependencies => {
           };
       } else {
           module.exports = {
-            getTransformModulePath() {
-                return require.resolve("react-native-typescript-transformer")
-            },
-            getSourceExts() {
-                return ["ts", "tsx"]
-            },
             extraNodeModules,
             getBlacklistRE: () => require('metro/src/blacklist')(blacklistRegexes),
-            getProjectRoots: () => [path.resolve(__dirname)].concat(watchFolders)
+            getProjectRoots: () => [path.resolve(__dirname)].concat(watchFolders),
+            transformer: {
+                getTransformOptions: async () => ({
+                    transform: {
+                        experimentalImportSupport: false,
+                        inlineRequires: false
+                    }
+                })
+            }
           };
       }
 

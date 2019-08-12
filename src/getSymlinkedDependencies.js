@@ -1,7 +1,12 @@
 const fs = require('fs')
 
-const isSymlink = dependency =>
-    fs.lstatSync(`node_modules/${dependency}`).isSymbolicLink()
+const isSymlink = dependency => {
+    const exists = fs.existsSync(`node_modules/${dependency}`)
+    if (exists) {
+        return fs.lstatSync(`node_modules/${dependency}`).isSymbolicLink()
+    }
+    return false
+}
 
 module.exports = directory => {
     const pacakgeJson = require(`${directory}/package.json`)
