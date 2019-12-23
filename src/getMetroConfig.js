@@ -26,8 +26,8 @@ const mapBL = path => {
 
 const mapPath = path =>
     `/${path.replace(
-      /\//g,
-      "[/\\\\]"
+        /\//g,
+        "[/\\\\]"
     )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`;
 
 module.exports = symlinkedDependencies => {
@@ -54,7 +54,6 @@ module.exports = symlinkedDependencies => {
             (dependency, i, dependencies) =>
                 dependencies.indexOf(dependency) === i,
         )
-
     const devDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
         .map(path => require(`${path}/package.json`).devDependencies)
         .map(
@@ -81,6 +80,7 @@ module.exports = symlinkedDependencies => {
             const regex = new RegExp(/@babel\/runtime/);
             return !regex.test(d)
         })
+
     const extraNodeModules = peerDependenciesOfSymlinkedDependencies
         .map(mapModule)
         .join(',\n  ')
@@ -94,6 +94,13 @@ module.exports = symlinkedDependencies => {
         .concat(getBlacklistForSymlink)
         .join(',\n  ')
 
+    const getFullBlacklist = symlinkedDependenciesPaths.map(d => {
+        return `${d}/example`
+    }).map(d => replaceAll(d, /\\/, "\/")).map(mapBL)
+        .concat(getBlacklistRE)
+        .join(',\n  ')
+
+
     const getProjectRoots = symlinkedDependenciesPaths
         .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
         .join(',\n  ')
@@ -105,7 +112,7 @@ module.exports = symlinkedDependencies => {
         ${extraNodeModules}
       };
       const blacklistRegexes = [
-        ${getBlacklistRE}
+        ${getFullBlacklist}
       ];
       const watchFolders = [
         ${getProjectRoots}
