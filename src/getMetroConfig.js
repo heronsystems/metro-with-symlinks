@@ -11,24 +11,22 @@ const dedent = require('dedent-js')
 const getDependencyPath = require('./getDependencyPath')
 
 const replaceAll = (str, find, replace) => {
-    return str.replace(new RegExp(find, 'g'), replace);
+    return str.replace(new RegExp(find, 'g'), replace)
 }
 
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
 const mapBL = path => {
-    const basePath = `/${path.replace(/\//g, "[/\\\\]")}`
-    return (
-        `${basePath}[/\\\\].*/`
-    )
+    const basePath = `/${path.replace(/\//g, '[/\\\\]')}`
+    return `${basePath}[/\\\\].*/`
 }
 
 const mapPath = path =>
     `/${path.replace(
         /\//g,
-        "[/\\\\]"
-    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`;
+        '[/\\\\]',
+    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
 
 module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
@@ -37,9 +35,8 @@ module.exports = symlinkedDependencies => {
 
     const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
         .map(path => require(`${path}/package.json`).peerDependencies)
-        .map(
-            peerDependencies =>
-                peerDependencies ? Object.keys(peerDependencies) : [],
+        .map(peerDependencies =>
+            peerDependencies ? Object.keys(peerDependencies) : [],
         )
         // flatten the array of arrays
         .reduce(
@@ -56,12 +53,14 @@ module.exports = symlinkedDependencies => {
         )
     const devDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
         .map(path => require(`${path}/package.json`).devDependencies)
-        .map(
-            (devDependencies, i) => {
-                const path = symlinkedDependenciesPaths[i]
-                return devDependencies ? Object.keys(devDependencies).map(k => `${path}/node_modules/${k}`) : []
-            }
-        )
+        .map((devDependencies, i) => {
+            const path = symlinkedDependenciesPaths[i]
+            return devDependencies
+                ? Object.keys(devDependencies).map(
+                      k => `${path}/node_modules/${k}`,
+                  )
+                : []
+        })
         // flatten the array of arrays
         .reduce(
             (flatDependencies, dependencies) => [
@@ -77,7 +76,7 @@ module.exports = symlinkedDependencies => {
         )
         // BH (7/26/2019): This is odd but it seems like anything that uses RN components needs @babel/runtime.
         .filter(d => {
-            const regex = new RegExp(/@babel\/runtime/);
+            const regex = new RegExp(/@babel\/runtime|safe-buffer/)
             return !regex.test(d)
         })
 
@@ -85,21 +84,25 @@ module.exports = symlinkedDependencies => {
         .map(mapModule)
         .join(',\n  ')
 
-    const getBlacklistForSymlink = symlinkedDependenciesPaths.map(d => replaceAll(d, /\\/, "\/"))
+    const getBlacklistForSymlink = symlinkedDependenciesPaths
+        .map(d => replaceAll(d, /\\/, '/'))
         .map(mapPath)
         .join(',\n  ')
 
-    const getBlacklistRE = devDependenciesOfSymlinkedDependencies.map(d => replaceAll(d, /\\/, "\/"))
+    const getBlacklistRE = devDependenciesOfSymlinkedDependencies
+        .map(d => replaceAll(d, /\\/, '/'))
         .map(mapBL)
         .concat(getBlacklistForSymlink)
         .join(',\n  ')
 
-    const getFullBlacklist = symlinkedDependenciesPaths.map(d => {
-        return `${d}/example`
-    }).map(d => replaceAll(d, /\\/, "\/")).map(mapBL)
+    const getFullBlacklist = symlinkedDependenciesPaths
+        .map(d => {
+            return `${d}/example`
+        })
+        .map(d => replaceAll(d, /\\/, '/'))
+        .map(mapBL)
         .concat(getBlacklistRE)
         .join(',\n  ')
-
 
     const getProjectRoots = symlinkedDependenciesPaths
         .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
