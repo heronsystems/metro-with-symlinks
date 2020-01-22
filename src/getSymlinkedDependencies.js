@@ -17,6 +17,5 @@ module.exports = directory => {
     ]
         .filter(isSymlink)
         .filter(dep => fs.existsSync(`node_modules/${dep}`))
-    console.log(symlinks)
     return symlinks
 }
