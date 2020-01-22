@@ -13,8 +13,12 @@ const getMetroConfig = require('./getMetroConfig')
 const getDependencyPath = require('./getDependencyPath')
 
 const CONFIG_FILENAME = 'metro.config.js'
+const BABEL_CONFIG_FILENAME = 'babel.config.js'
 
 const mapDep = dep => `    - ${dep} -> ${getDependencyPath(dep)}`
+const mapAliasDep = dep => {
+    return `"${dep}": "${getDependencyPath(dep)}"`
+}
 
 module.exports = (cwd, command, flags) => {
     const symlinkedDependencies = getSymlinkedDependencies(cwd)
@@ -22,6 +26,26 @@ module.exports = (cwd, command, flags) => {
 
     const config = getMetroConfig(symlinkedDependencies)
     fs.writeFileSync(CONFIG_FILENAME, config)
+
+    fs.writeFileSync(
+        BABEL_CONFIG_FILENAME,
+        dedent`
+            module.exports = {
+                presets: ["module:metro-react-native-babel-preset"],
+                plugins: [
+                    [
+                        "module-resolver",
+                        {
+                            alias: {
+                                ${symlinkedDependencies
+                                    .map(mapAliasDep)
+                                    .join(', \n\t\t\t\t\t')}}
+                        }
+                    ]
+                ]
+            }
+        `,
+    )
 
     if (!symlinkedDependencies || symlinkedDependencies.length === 0) {
         console.log(dedent`

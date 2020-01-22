@@ -9,11 +9,14 @@ const isSymlink = dependency => {
 }
 
 module.exports = directory => {
-    const pacakgeJson = require(`${directory}/package.json`)
-    return [
-        ...Object.keys(pacakgeJson.devDependencies || {}),
-        ...Object.keys(pacakgeJson.dependencies || {}),
+    const packageJson = require(`${directory}/package.json`)
+    const symlinks = [
+        ...Object.keys(packageJson.devDependencies || {}),
+        ...Object.keys(packageJson.dependencies || {}),
+        ...Object.keys(packageJson.peerDependencies || {}),
     ]
         .filter(isSymlink)
         .filter(dep => fs.existsSync(`node_modules/${dep}`))
+    console.log(symlinks)
+    return symlinks
 }

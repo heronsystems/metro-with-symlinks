@@ -33,6 +33,8 @@ module.exports = symlinkedDependencies => {
         getDependencyPath,
     )
 
+    console.log(symlinkedDependenciesPaths)
+
     const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
         .map(path => require(`${path}/package.json`).peerDependencies)
         .map(peerDependencies =>
