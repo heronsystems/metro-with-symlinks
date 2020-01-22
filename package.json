@@ -1,6 +1,6 @@
 {
     "name": "@heronsystems/metro-with-symlinks",
-    "version": "2.0.2",
+    "version": "3.0.0-beta.0",
     "description": "Extension to metro packager enabling the use of symlinks.",
     "license": "MIT",
     "author": "@MrLoh",
@@ -14,7 +14,8 @@
     "repository": "https://github.com/heronsystems/metro-with-symlinks",
     "scripts": {
         "format": "prettier --write --list-different '**/*.js'",
-        "test": "format"
+        "test": "format",
+        "prepublish": "git push && git push --tags"
     },
     "dependencies": {
         "dedent-js": "^1.0.1"
