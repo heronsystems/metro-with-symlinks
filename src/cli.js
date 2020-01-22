@@ -17,7 +17,7 @@ const BABEL_CONFIG_FILENAME = 'babel.config.js'
 
 const mapDep = dep => `    - ${dep} -> ${getDependencyPath(dep)}`
 const mapAliasDep = dep => {
-    return `"${dep}": "${getDependencyPath(dep)}"`
+    return `"${dep}": "${getDependencyPath(dep).replace(/\\/g, '\\\\')}"`
 }
 
 module.exports = (cwd, command, flags) => {
